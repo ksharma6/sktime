@@ -12,11 +12,12 @@ from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import PolynomialFeatures
 
-from sktime.forecasting.base import BaseForecaster
+from sktime.forecasting.base._delegate import _DelegatedForecaster
+from sktime.forecasting.trend._trend_forecaster import TrendForecaster
 from sktime.forecasting.trend._util import _get_X_numpy_int_from_pandas
 
 
-class PolynomialTrendForecaster(BaseForecaster):
+class PolynomialTrendForecaster(_DelegatedForecaster):
     r"""Forecast time series data with a polynomial trend.
 
     Uses an ``sklearn`` regressor specified by the ``regressor`` parameter
@@ -177,11 +178,8 @@ class PolynomialTrendForecaster(BaseForecaster):
             Point predictions for the forecast
         """
         # use relative fh as time index to predict
-        fh = self.fh.to_absolute_index(self.cutoff)
-        X_sklearn = _get_X_numpy_int_from_pandas(fh)
-        y_pred_sklearn = self.regressor_.predict(X_sklearn)
-        y_pred = pd.Series(y_pred_sklearn, index=fh)
-        y_pred.name = self._y.name
+        self.forcaster = TrendForecaster(self.regressor_)
+        y_pred = self.forcaster.predict(fh=fh, X=X)
         return y_pred
 
     def _predict_var(self, fh=None, X=None, cov=False):
