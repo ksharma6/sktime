@@ -9,11 +9,11 @@ import pandas as pd
 from sklearn.base import clone
 from sklearn.linear_model import LinearRegression
 
-from sktime.forecasting.base import BaseForecaster
+from sktime.forecasting.base._delegate import _DelegatedForecaster
 from sktime.forecasting.trend._util import _get_X_numpy_int_from_pandas
 
 
-class TrendForecaster(BaseForecaster):
+class TrendForecaster(_DelegatedForecaster):
     r"""Trend based forecasts of time series data, regressing values on index.
 
     Uses an ``sklearn`` regressor specified by the ``regressor`` parameter
